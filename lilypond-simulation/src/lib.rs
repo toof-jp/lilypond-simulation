@@ -1,22 +1,30 @@
+use wasm_bindgen::prelude::*;
+use serde::{Deserialize, Serialize};
+use tsify::Tsify;
 use rand::Rng;
 
 pub struct Points<'a>(&'a Vec<Point>);
 
+#[derive(Tsify, Serialize, Deserialize)]
+#[tsify(into_wasm_abi)]
 pub struct Point(Vec<f64>);
 
 pub struct Radii(Vec<f64>);
 
+#[derive(Tsify, Serialize, Deserialize)]
+#[tsify(into_wasm_abi)]
 pub struct Circle {
     point: Point,
     radius: f64,
 }
 
+#[wasm_bindgen]
 pub fn simulate(dimension: usize, num_points: usize) -> Vec<Circle> {
     let mut rng = rand::rng();
     let mut points = Vec::new();
     
     for _ in 0..num_points {
-        let point = Point(vec![rng.random_range(0.0..=1.0); dimension]);
+        let point = Point((0..dimension).map(|_| rng.random_range(0.0..=1.0)).collect());
         points.push(point);
     }
     
@@ -34,6 +42,10 @@ pub fn growth_maximal_system_of_non_overlapping_balls(points: &Points<'_>) -> Ra
     let mut radii = Radii(vec![0.0; points.0.len()]);
     
     let len = points.0.len();
+    
+    if len == 1 {
+        radii.0[0] = max_radius(&points.0[0]);
+    }
     
     for _ in 0..len {
         let mut min_radius = (f64::MAX, None);

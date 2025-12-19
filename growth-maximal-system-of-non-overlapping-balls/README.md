@@ -1,1 +1,0 @@
-# growth-maximal-system-of-non-overlapping-balls
